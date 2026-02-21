@@ -1,40 +1,24 @@
 const path = require('path');
-const cors = require('cors');
 
-// 1. Force Node to find your .env file in the root folder
+// This forces Node to look exactly two folders up from this file's location
 const envPath = path.join(__dirname, '../../.env');
 require('dotenv').config({ path: envPath });
 
 const express = require('express');
-const apiRouter = require('./routes'); // Make sure this points to your routes folder
+const apiRouter = require('./routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 2. CRITICAL FOR FRONTEND: Allow Next.js (Port 3001) to talk to this API
-app.use(cors({
-    origin: 'http://localhost:3001',
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type']
-}));
-
-// 3. Middleware to parse JSON bodies
 app.use(express.json());
-
-// 4. Mount the routes
 app.use('/api/v1', apiRouter);
 
-// 5. Basic Health Check Route (Your teammate's UI looks for this!)
 app.get('/health', (req, res) => {
-    res.status(200).json({ 
-        status: 'ok', 
-        postgres: 'connected', 
-        redis: 'connected' 
-    });
+    res.status(200).json({ status: 'UP', message: 'API is running' });
 });
 
-// 6. Start the server
 app.listen(PORT, () => {
     console.log(`🚀 API Server running on http://localhost:${PORT}`);
+    console.log(`🔍 Checking env variables... PORT is set to: ${process.env.PORT ? process.env.PORT : 'MISSING'}`);
     console.log(`🔍 Checking DB... DB_USER is set to: ${process.env.DB_USER ? process.env.DB_USER : 'MISSING'}`);
 });
