@@ -71,7 +71,7 @@ function isValidEthAddress(address) {
  */
 async function startScan(req, res) {
   try {
-    const { contractAddress } = req.body;
+    const contractAddress = req.body.contractAddress || req.body.contract_address;
 
     // --- Validation ---
     if (!contractAddress) {
@@ -109,13 +109,15 @@ async function startScan(req, res) {
         jobId: scanId,
       }
     );
-
-    return res.status(202).json({
-      message: 'Scan initiated successfully.',
-      scanId,
-      status: 'pending',
-      streamUrl: `/api/v1/scans/${scanId}/stream`,
-    });
+return res.status(200).json({
+  id: scanId, // <-- The magic fix!
+  contract_address: contractAddress.toLowerCase(),
+  status: 'pending',
+  results: {},
+  narration_log: [],
+  final_score: null,
+  streamUrl: `/api/v1/scans/${scanId}/stream`
+});
   } catch (err) {
     console.error('[startScan] Unexpected error:', err);
     return res.status(500).json({ error: 'Internal server error.' });
@@ -164,4 +166,41 @@ async function getScanStatus(req, res) {
   }
 }
 
-module.exports = { startScan, getScanStatus };
+/**
+ * GET /api/v1/scans/:id/stream
+ * Sets up a Server-Sent Events (SSE) connection for the Next.js frontend.
+ */
+async function streamScanStatus(req, res) {
+  const { id } = req.params;
+
+  // 1. Set the exact headers the Next.js frontend requires
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  // 2. Send the initial connection success message
+  res.write(`data: ${JSON.stringify({ type: 'status', data: { status: 'connected' } })}\n\n`);
+
+  // 3. Hackathon Simulation: Since your AI workers aren't fully hooked up 
+  // to the DB yet, let's simulate a live stream so the UI looks amazing.
+  let step = 0;
+  const simulation = setInterval(() => {
+    step++;
+    if (step === 1) {
+      res.write(`data: ${JSON.stringify({ type: 'narration', data: { stage: 'slither', text: 'Initiating static analysis...' } })}\n\n`);
+    } else if (step === 2) {
+      res.write(`data: ${JSON.stringify({ type: 'narration', data: { stage: 'mythril', text: 'Symbolic execution engine engaged. Mapping attack vectors.' } })}\n\n`);
+    } else if (step === 3) {
+      res.write(`data: ${JSON.stringify({ type: 'score', data: { final_score: 85 } })}\n\n`);
+      res.write(`data: ${JSON.stringify({ type: 'complete', data: { status: 'completed' } })}\n\n`);
+      clearInterval(simulation);
+    }
+  }, 3000); // Sends a new fake AI update every 3 seconds
+
+  // 4. Cleanup when the browser closes the tab
+  req.on('close', () => {
+    clearInterval(simulation);
+  });
+}
+
+module.exports = { startScan, getScanStatus, streamScanStatus };
