@@ -1,0 +1,15 @@
+# Node
+node_modules/
+npm-debug.log
+
+# Environment Variables
+.env
+
+# Docker Database Volumes (CRITICAL: Do not push local DB data)
+pgdata/
+neo4jdata/
+miniodata/
+
+# OS Files
+.DS_Store
+Thumbs.db
