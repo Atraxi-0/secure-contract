@@ -414,11 +414,6 @@ Built at **INCUBATEX Hackathon** by Team Secure-Contract.
 
 ---
 
-## 📄 License
-
-MIT License — see `LICENSE` for details.
-
----
 
 <div align="center">
 
@@ -428,3 +423,4 @@ MIT License — see `LICENSE` for details.
 **🛡️ Secure-Contract — Audit before you deploy.**
 
 </div>
+
