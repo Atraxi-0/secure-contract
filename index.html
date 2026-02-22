@@ -727,8 +727,8 @@
       // ── Config ──────────────────────────────────────────────────────────────
       const API = "http://localhost:3000";
       // Anthropic key for direct browser LLM calls (fallback only — worker does primary narration)
-      // Line 730 in your index.html should look like this:
-const ANTHROPIC_KEY = "YOUR_ANTHROPIC_API_KEY_HERE";
+      const ANTHROPIC_KEY =
+        "KEY_HERE";
 
       // ── State ────────────────────────────────────────────────────────────────
       let es = null;
@@ -737,17 +737,17 @@ const ANTHROPIC_KEY = "YOUR_ANTHROPIC_API_KEY_HERE";
 
       // ── Canvas Gauge ──────────────────────────────────────────────────────────
       const GAUGE_COLORS = {
-        safe:   "#00e87a",
-        warn:   "#f5c400",
+        safe: "#00e87a",
+        warn: "#f5c400",
         danger: "#ff2d55",
         active: "#00c8f0",
-        idle:   "#1e3050",
+        idle: "#1e3050",
       };
 
       function scoreToColorName(s) {
         if (s === null) return "idle";
-        if (s >= 70)   return "safe";
-        if (s >= 40)   return "warn";
+        if (s >= 70) return "safe";
+        if (s >= 40) return "warn";
         return "danger";
       }
 
@@ -755,11 +755,15 @@ const ANTHROPIC_KEY = "YOUR_ANTHROPIC_API_KEY_HERE";
         const cv = document.getElementById("cv-" + id);
         if (!cv) return;
         const ctx = cv.getContext("2d");
-        const W = 140, H = 90, cx = 70, cy = 82, R = 54;
+        const W = 140,
+          H = 90,
+          cx = 70,
+          cy = 82,
+          R = 54;
         ctx.clearRect(0, 0, W, H);
 
         const startA = Math.PI;
-        const endA   = 2 * Math.PI;
+        const endA = 2 * Math.PI;
 
         // Track
         ctx.beginPath();
@@ -807,19 +811,24 @@ const ANTHROPIC_KEY = "YOUR_ANTHROPIC_API_KEY_HERE";
           const inner = isMajor ? R - 14 : R - 8;
           ctx.beginPath();
           ctx.moveTo(cx + Math.cos(a) * (R + 1), cy + Math.sin(a) * (R + 1));
-          ctx.lineTo(cx + Math.cos(a) * inner,   cy + Math.sin(a) * inner);
-          ctx.strokeStyle = isMajor ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.1)";
+          ctx.lineTo(cx + Math.cos(a) * inner, cy + Math.sin(a) * inner);
+          ctx.strokeStyle = isMajor
+            ? "rgba(255,255,255,0.3)"
+            : "rgba(255,255,255,0.1)";
           ctx.lineWidth = isMajor ? 2 : 1;
           ctx.stroke();
         }
 
         // Needle
         if (score !== null) {
-          const na  = startA + (score / 100) * (endA - startA);
+          const na = startA + (score / 100) * (endA - startA);
           const col = GAUGE_COLORS[scoreToColorName(score)];
           ctx.beginPath();
           ctx.moveTo(cx, cy);
-          ctx.lineTo(cx + Math.cos(na) * (R - 10), cy + Math.sin(na) * (R - 10));
+          ctx.lineTo(
+            cx + Math.cos(na) * (R - 10),
+            cy + Math.sin(na) * (R - 10),
+          );
           ctx.strokeStyle = "#ffffff";
           ctx.lineWidth = 2.5;
           ctx.lineCap = "round";
@@ -863,17 +872,22 @@ const ANTHROPIC_KEY = "YOUR_ANTHROPIC_API_KEY_HERE";
         card.className = "gauge-card " + cls;
 
         // Animated count-up
-        const el  = document.getElementById("gsc-" + id);
-        const rk  = document.getElementById("grk-" + id);
-        let cur   = 0;
+        const el = document.getElementById("gsc-" + id);
+        const rk = document.getElementById("grk-" + id);
+        let cur = 0;
         const step = Math.max(1, Math.ceil(score / 40));
-        const iv  = setInterval(() => {
+        const iv = setInterval(() => {
           cur = Math.min(cur + step, score);
           el.textContent = cur;
           drawGauge(id, cur, false);
           if (cur >= score) {
             clearInterval(iv);
-            rk.textContent = score >= 70 ? "LOW RISK" : score >= 40 ? "MEDIUM RISK" : "HIGH RISK";
+            rk.textContent =
+              score >= 70
+                ? "LOW RISK"
+                : score >= 40
+                  ? "MEDIUM RISK"
+                  : "HIGH RISK";
           }
         }, 25);
       }
@@ -883,9 +897,9 @@ const ANTHROPIC_KEY = "YOUR_ANTHROPIC_API_KEY_HERE";
         const card = document.getElementById("gc-" + id);
         if (card) card.className = "gauge-card";
         const el = document.getElementById("gsc-" + id);
-        if (el)  el.textContent = "—";
+        if (el) el.textContent = "—";
         const rk = document.getElementById("grk-" + id);
-        if (rk)  rk.textContent = "PENDING";
+        if (rk) rk.textContent = "PENDING";
         drawGauge(id, null, false);
       }
 
@@ -901,8 +915,8 @@ const ANTHROPIC_KEY = "YOUR_ANTHROPIC_API_KEY_HERE";
         const icons = {
           slither: ["🔍", "ico-slither"],
           mythril: ["🔮", "ico-mythril"],
-          gnn:     ["🧠", "ico-gnn"],
-          forge:   ["⚡", "ico-forge"],
+          gnn: ["🧠", "ico-gnn"],
+          forge: ["⚡", "ico-forge"],
         };
         const [em, cls] = icons[s] || ["📝", "ico-def"];
 
@@ -936,8 +950,12 @@ const ANTHROPIC_KEY = "YOUR_ANTHROPIC_API_KEY_HERE";
       }
 
       // ── Helpers ──────────────────────────────────────────────────────────────
-      function show(id) { document.getElementById(id).classList.remove("hidden"); }
-      function hide(id) { document.getElementById(id).classList.add("hidden"); }
+      function show(id) {
+        document.getElementById(id).classList.remove("hidden");
+      }
+      function hide(id) {
+        document.getElementById(id).classList.add("hidden");
+      }
 
       function showErr(m) {
         const e = document.getElementById("err");
@@ -955,13 +973,21 @@ const ANTHROPIC_KEY = "YOUR_ANTHROPIC_API_KEY_HERE";
         const addr = document.getElementById("addr").value.trim();
         document.getElementById("err").style.display = "none";
 
-        if (!addr) { showErr("Please enter a contract address."); return; }
+        if (!addr) {
+          showErr("Please enter a contract address.");
+          return;
+        }
         if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) {
-          showErr("Invalid Ethereum address — must be 0x followed by 40 hex characters.");
+          showErr(
+            "Invalid Ethereum address — must be 0x followed by 40 hex characters.",
+          );
           return;
         }
 
-        if (es) { es.close(); es = null; }
+        if (es) {
+          es.close();
+          es = null;
+        }
 
         const btn = document.getElementById("btn");
         btn.disabled = true;
@@ -969,7 +995,10 @@ const ANTHROPIC_KEY = "YOUR_ANTHROPIC_API_KEY_HERE";
 
         // Reset everything
         stageOrder.forEach((id) => resetGauge(id));
-        if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+        if (animFrame) {
+          cancelAnimationFrame(animFrame);
+          animFrame = null;
+        }
         activeSet.clear();
         Object.keys(scores).forEach((k) => (scores[k] = null));
 
@@ -986,7 +1015,10 @@ const ANTHROPIC_KEY = "YOUR_ANTHROPIC_API_KEY_HERE";
 
           if (!res.ok) {
             const d = await res.json().catch(() => ({}));
-            showErr(d.error || `API error ${res.status} — is the API running on port 3000?`);
+            showErr(
+              d.error ||
+                `API error ${res.status} — is the API running on port 3000?`,
+            );
             resetBtn();
             return;
           }
@@ -997,15 +1029,18 @@ const ANTHROPIC_KEY = "YOUR_ANTHROPIC_API_KEY_HERE";
           show("gaugesCard");
           show("feedCard");
 
-          document.getElementById("mId").textContent   = (scan.id || "—").slice(0, 18) + "...";
-          document.getElementById("mAddr").textContent = addr.slice(0, 12) + "..." + addr.slice(-8);
+          document.getElementById("mId").textContent =
+            (scan.id || "—").slice(0, 18) + "...";
+          document.getElementById("mAddr").textContent =
+            addr.slice(0, 12) + "..." + addr.slice(-8);
           setStatus(scan.status || "pending");
           setGaugeActive("slither");
 
           openStream(scan.id);
-
         } catch (e) {
-          showErr("Network error — is the API running on port 3000? " + e.message);
+          showErr(
+            "Network error — is the API running on port 3000? " + e.message,
+          );
           resetBtn();
         }
       }
@@ -1021,7 +1056,11 @@ const ANTHROPIC_KEY = "YOUR_ANTHROPIC_API_KEY_HERE";
 
         es.onmessage = async (evt) => {
           let msg;
-          try { msg = JSON.parse(evt.data); } catch { return; }
+          try {
+            msg = JSON.parse(evt.data);
+          } catch {
+            return;
+          }
 
           const { type, data } = msg;
           if (!data) return;
@@ -1042,17 +1081,26 @@ const ANTHROPIC_KEY = "YOUR_ANTHROPIC_API_KEY_HERE";
 
             // Final verdict — close everything out
             if (data.status === "completed" || stage === "final-verdict") {
-              const validScores = Object.values(scores).filter((s) => s !== null);
-              const finalScore  = validScores.length
-                ? Math.round(validScores.reduce((a, b) => a + b, 0) / validScores.length)
-                : (data.score || 50);
+              const validScores = Object.values(scores).filter(
+                (s) => s !== null,
+              );
+              const finalScore = validScores.length
+                ? Math.round(
+                    validScores.reduce((a, b) => a + b, 0) / validScores.length,
+                  )
+                : data.score || 50;
 
               const verdict =
-                finalScore >= 70 ? "LOW RISK — Contract appears safe for deployment."
-                : finalScore >= 40 ? "MEDIUM RISK — Review flagged issues before deploying."
-                : "HIGH RISK — Critical vulnerabilities detected. Do NOT deploy.";
+                finalScore >= 70
+                  ? "LOW RISK — Contract appears safe for deployment."
+                  : finalScore >= 40
+                    ? "MEDIUM RISK — Review flagged issues before deploying."
+                    : "HIGH RISK — Critical vulnerabilities detected. Do NOT deploy.";
 
-              addFeed("final-verdict", `✅ Analysis complete. Overall security score: ${finalScore}/100\n\n${verdict}`);
+              addFeed(
+                "final-verdict",
+                `✅ Analysis complete. Overall security score: ${finalScore}/100\n\n${verdict}`,
+              );
               setStatus("completed");
               document.getElementById("streamBar").classList.remove("show");
               es.close();
@@ -1069,19 +1117,22 @@ const ANTHROPIC_KEY = "YOUR_ANTHROPIC_API_KEY_HERE";
               } else if (Array.isArray(data.detectors)) {
                 let s = 100;
                 data.detectors.forEach((d) => {
-                  if      (d.impact === "High")   s -= 25;
+                  if (d.impact === "High") s -= 25;
                   else if (d.impact === "Medium") s -= 10;
-                  else if (d.impact === "Low")    s -= 4;
-                  else                            s -= 1;
+                  else if (d.impact === "Low") s -= 4;
+                  else s -= 1;
                 });
                 score = Math.max(0, Math.min(100, s));
               } else if (typeof data.findings === "number") {
                 score = Math.max(0, 95 - data.findings * 25);
               } else {
                 // Simulated scores for stages without real workers yet
-                score = stage === "mythril" ? Math.floor(50 + Math.random() * 35)
-                      : stage === "gnn"     ? Math.floor(55 + Math.random() * 35)
-                      :                       Math.floor(60 + Math.random() * 30);
+                score =
+                  stage === "mythril"
+                    ? Math.floor(50 + Math.random() * 35)
+                    : stage === "gnn"
+                      ? Math.floor(55 + Math.random() * 35)
+                      : Math.floor(60 + Math.random() * 30);
               }
 
               scores[stage] = score;
@@ -1135,30 +1186,34 @@ const ANTHROPIC_KEY = "YOUR_ANTHROPIC_API_KEY_HERE";
             const resp = await fetch("https://api.anthropic.com/v1/messages", {
               method: "POST",
               headers: {
-                "Content-Type":  "application/json",
-                "x-api-key":     ANTHROPIC_KEY,
+                "Content-Type": "application/json",
+                "x-api-key": ANTHROPIC_KEY,
                 "anthropic-version": "2023-06-01",
                 "anthropic-dangerous-direct-browser-access": "true",
               },
               body: JSON.stringify({
                 model: "claude-haiku-4-5-20251001",
                 max_tokens: 400,
-                messages: [{
-                  role: "user",
-                  content: `You are a smart contract security expert. Summarize these ${stage} findings in 3-5 plain English sentences. Cover: severity, what it means for user funds, and fix recommendation. No markdown headers.\n\nFindings: ${JSON.stringify(detectors.slice(0, 5)).slice(0, 1200)}`,
-                }],
+                messages: [
+                  {
+                    role: "user",
+                    content: `You are a smart contract security expert. Summarize these ${stage} findings in 3-5 plain English sentences. Cover: severity, what it means for user funds, and fix recommendation. No markdown headers.\n\nFindings: ${JSON.stringify(detectors.slice(0, 5)).slice(0, 1200)}`,
+                  },
+                ],
               }),
             });
             const d = await resp.json();
             if (d.content?.[0]?.text) return d.content[0].text;
-          } catch (e) { /* fall through */ }
+          } catch (e) {
+            /* fall through */
+          }
         }
 
         // Pure JS fallback
         if (!detectors.length) {
           return `✅ ${stage} analysis complete. No vulnerabilities detected.`;
         }
-        const high   = detectors.filter((d) => d.impact === "High");
+        const high = detectors.filter((d) => d.impact === "High");
         const medium = detectors.filter((d) => d.impact === "Medium");
         let t = `🔍 ${stage} found ${detectors.length} issue(s): ${high.length} critical, ${medium.length} medium.\n\n`;
         if (high.length) {

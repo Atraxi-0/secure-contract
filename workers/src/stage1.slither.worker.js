@@ -4,15 +4,16 @@ require("dotenv").config({
   path: require("path").resolve(__dirname, "../../.env"),
 });
 
-const { Worker } = require("bullmq");
-const { Pool } = require("pg");
-const { createClient } = require("redis");
+const { Worker, Queue } = require("bullmq");
+const { Pool }          = require("pg");
+const { createClient }  = require("redis");
 const { readFileSync, existsSync } = require("fs");
-const path = require("path");
+const path  = require("path");
 const https = require("https");
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const QUEUE_NAME = "contract-analysis";
+const IN_QUEUE   = "contract-analysis";   // API pushes here
+const OUT_QUEUE  = "mythril-analysis";    // We chain Mythril after us
 const STAGE_NAME = "slither";
 const OUTPUT_PATH = path.resolve(__dirname, "../../slither_output.json");
 
@@ -30,9 +31,8 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD || "app",
 });
 
-const publisher = createClient({
-  socket: { host: redisConnection.host, port: redisConnection.port },
-});
+const publisher    = createClient({ socket: { host: redisConnection.host, port: redisConnection.port } });
+const mythrilQueue = new Queue(OUT_QUEUE, { connection: redisConnection });
 
 // ─── LLM Narration ────────────────────────────────────────────────────────────
 function buildFallbackNarration(detectors) {
@@ -65,7 +65,7 @@ function buildFallbackNarration(detectors) {
   }
 
   if (high.length > 0) {
-    text += `💡 Recommendation: This contract has critical reentrancy vulnerabilities. User funds are at risk. Do NOT deploy without fixing state variable ordering and adding reentrancy guards.`;
+    text += `💡 Recommendation: Critical reentrancy vulnerabilities detected. User funds are at risk. Do NOT deploy without fixing state variable ordering and adding reentrancy guards.`;
   } else if (medium.length > 0) {
     text += `💡 Recommendation: Review and address medium-severity issues before mainnet deployment.`;
   } else {
@@ -77,201 +77,160 @@ function buildFallbackNarration(detectors) {
 
 async function generateNarration(detectors) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
-
-  // Use fallback if no real key
   if (!apiKey || apiKey === "your_key_here" || apiKey.trim() === "") {
     console.log("[LLM] No API key — using fallback narration.");
     return buildFallbackNarration(detectors);
   }
 
-  console.log("[LLM] Calling Anthropic API...");
-
   const body = JSON.stringify({
     model: "claude-haiku-4-5-20251001",
     max_tokens: 500,
-    messages: [
-      {
-        role: "user",
-        content: `You are a smart contract security expert writing a report for a developer.
+    messages: [{
+      role: "user",
+      content: `You are a smart contract security expert writing a report for a developer.
 Analyze these Slither findings and write a clear, direct 4-6 sentence summary.
 Cover: what was found, the severity, what it means for user funds, and what to fix.
 Use plain English — no markdown headers, just flowing text with emojis for impact levels.
 
 Findings:
 ${JSON.stringify(detectors.slice(0, 5), null, 2)}`,
-      },
-    ],
+    }],
   });
 
   return new Promise((resolve) => {
-    const req = https.request(
-      {
-        hostname: "api.anthropic.com",
-        path: "/v1/messages",
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-          "Content-Length": Buffer.byteLength(body),
-        },
+    const req = https.request({
+      hostname: "api.anthropic.com",
+      path:     "/v1/messages",
+      method:   "POST",
+      headers: {
+        "Content-Type":      "application/json",
+        "x-api-key":         apiKey,
+        "anthropic-version": "2023-06-01",
+        "Content-Length":    Buffer.byteLength(body),
       },
-      (res) => {
-        let data = "";
-        res.on("data", (chunk) => { data += chunk; });
-        res.on("end", () => {
-          try {
-            const parsed = JSON.parse(data);
-            const text = parsed.content?.[0]?.text;
-            if (text && text.length > 20) {
-              console.log("[LLM] Narration received from Anthropic.");
-              resolve(text);
-            } else {
-              console.log("[LLM] Empty response — using fallback.");
-              resolve(buildFallbackNarration(detectors));
-            }
-          } catch (e) {
-            console.error("[LLM] Parse error:", e.message);
-            resolve(buildFallbackNarration(detectors));
-          }
-        });
-      }
-    );
-    req.on("error", (e) => {
-      console.error("[LLM] Request error:", e.message);
-      resolve(buildFallbackNarration(detectors));
+    }, (res) => {
+      let data = "";
+      res.on("data", (c) => { data += c; });
+      res.on("end", () => {
+        try {
+          const parsed = JSON.parse(data);
+          const text   = parsed.content?.[0]?.text;
+          resolve((text && text.length > 20) ? text : buildFallbackNarration(detectors));
+        } catch {
+          resolve(buildFallbackNarration(detectors));
+        }
+      });
     });
+    req.on("error", () => resolve(buildFallbackNarration(detectors)));
     req.write(body);
     req.end();
   });
 }
 
-// ─── Score calculation ────────────────────────────────────────────────────────
+// ─── Score ────────────────────────────────────────────────────────────────────
 function detectorsToScore(detectors) {
   let score = 100;
   (detectors || []).forEach((d) => {
     if      (d.impact === "High")          score -= 25;
     else if (d.impact === "Medium")        score -= 10;
     else if (d.impact === "Low")           score -= 4;
-    else                                   score -= 1;   // Informational
+    else                                   score -= 1;
   });
   return Math.max(0, Math.min(100, score));
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 async function publishUpdate(scanId, payload) {
-  const channel = `scan:${scanId}:updates`;
-  await publisher.publish(channel, JSON.stringify(payload));
+  await publisher.publish(`scan:${scanId}:updates`, JSON.stringify(payload));
   console.log(`[${STAGE_NAME}] Published: type=${payload.type}`);
 }
 
 function readSlitherOutput() {
-  console.log(`[${STAGE_NAME}] Reading: ${OUTPUT_PATH}`);
   if (!existsSync(OUTPUT_PATH)) {
-    console.error(`[${STAGE_NAME}] slither_output.json not found!`);
-    console.error(`[${STAGE_NAME}] Run: py -3.11 -m slither contracts/target.sol --json slither_output.json`);
+    console.error(`[${STAGE_NAME}] slither_output.json not found — run Slither first.`);
     return { success: false, detectors: [], error: "Output file not found" };
   }
   try {
-    const raw  = readFileSync(OUTPUT_PATH, "utf8");
-    const data = JSON.parse(raw);
+    const raw       = readFileSync(OUTPUT_PATH, "utf8");
+    const data      = JSON.parse(raw);
     const detectors = data.results?.detectors || [];
     console.log(`[${STAGE_NAME}] Found ${detectors.length} detector result(s).`);
-    return { success: true, detectors, raw };
+    return { success: true, detectors };
   } catch (e) {
-    console.error(`[${STAGE_NAME}] Failed to parse output:`, e.message);
     return { success: false, detectors: [], error: e.message };
   }
 }
 
-async function persistResults(scanId, detectors, narration) {
+async function persistResults(scanId, detectors, narration, score) {
   try {
     await pool.query(
       `UPDATE scans
-       SET status        = 'completed',
+       SET status        = 'processing',
            results       = COALESCE(results, '{}'::jsonb) || jsonb_build_object('slither', $2::jsonb),
            narration_log = COALESCE(narration_log, '[]'::jsonb) || jsonb_build_array(
                              jsonb_build_object('stage', $3::text, 'text', $4::text, 'timestamp', now())
                            ),
            updated_at    = now()
        WHERE id = $1`,
-      [scanId, JSON.stringify({ detectors }), STAGE_NAME, narration]
+      [scanId, JSON.stringify({ detectors, score }), STAGE_NAME, narration]
     );
   } catch (e) {
     console.error(`[${STAGE_NAME}] DB persist error:`, e.message);
   }
 }
 
-// ─── Job processor ────────────────────────────────────────────────────────────
+// ─── Job Processor ────────────────────────────────────────────────────────────
 async function processJob(job) {
-  const { scanId } = job.data;
+  const { scanId, contractAddress } = job.data;
   console.log(`\n[${STAGE_NAME}] Processing scan ${scanId}`);
 
-  // 1. Wait for SSE to connect
   await new Promise((r) => setTimeout(r, 2000));
 
-  // 2. Progress update — analysis starting
   await publishUpdate(scanId, {
     type: "narration",
     data: { stage: STAGE_NAME, text: "🔍 Stage 1: Running Slither static analysis on contract bytecode..." },
   });
 
-  // 3. Read findings
   const { success, detectors } = readSlitherOutput();
 
-  // 4. Progress update — generating narration
   await publishUpdate(scanId, {
     type: "narration",
     data: { stage: STAGE_NAME, text: "🤖 Analysis complete. Generating AI security report..." },
   });
 
-  // 5. Generate narration via Anthropic (or fallback)
   const narration = await generateNarration(detectors);
+  const score     = detectorsToScore(detectors);
 
-  // 6. Calculate risk score
-  const score = detectorsToScore(detectors);
+  await persistResults(scanId, detectors, narration, score);
 
-  // 7. Save to DB
-  await persistResults(scanId, detectors, narration);
-
-  // 8. Send COMPLETE with all data the frontend needs:
-  //    - narration: the full LLM text (shown in feed)
-  //    - detectors: raw array (frontend can use for its own processing)
-  //    - score: computed risk score (drives the gauge needle)
-  //    - findings: count (for display)
   await publishUpdate(scanId, {
     type: "complete",
     data: {
       stage:     STAGE_NAME,
-      text:      narration,          // non-empty → frontend shows this directly
-      score:     score,              // drives gauge
-      findings:  detectors.length,   // count
-      detectors: detectors,          // raw data
-      success:   success,
+      text:      narration,
+      score,
+      findings:  detectors.length,
+      detectors,
+      success,
     },
   });
 
-  // 9. Send final verdict to close the scan on the frontend
-  await new Promise((r) => setTimeout(r, 500));
-  await publishUpdate(scanId, {
-    type: "complete",
-    data: {
-      status: "completed",           // triggers frontend finalVerdictHandler
-      stage:  "final-verdict",
-      score:  score,
-    },
+  // ── Chain to Mythril ──
+  await mythrilQueue.add("mythril-analyze", { scanId, contractAddress }, {
+    attempts: 1,
+    removeOnComplete: { age: 3600 },
+    removeOnFail:     { age: 86400 },
   });
 
-  console.log(`[${STAGE_NAME}] Done. Score: ${score}. Findings: ${detectors.length}.`);
+  console.log(`[${STAGE_NAME}] Done. Score: ${score}. Chained to Mythril.`);
   return { scanId, stage: STAGE_NAME, success: true };
 }
 
 // ─── Bootstrap ────────────────────────────────────────────────────────────────
 async function bootstrap() {
   await publisher.connect();
-  console.log("[Worker] Redis publisher connected.");
 
-  const worker = new Worker(QUEUE_NAME, processJob, {
+  const worker = new Worker(IN_QUEUE, processJob, {
     connection: redisConnection,
     concurrency: 1,
   });
@@ -280,7 +239,7 @@ async function bootstrap() {
   worker.on("completed", (job) => console.log(`[Worker] Job completed: ${job.id}`));
   worker.on("failed",    (job, err) => console.error(`[Worker] Job failed:`, err.message));
 
-  console.log(`[Worker] Stage 1 (${STAGE_NAME}) listening on "${QUEUE_NAME}"…`);
+  console.log(`[Worker] Stage 1 (${STAGE_NAME}) listening on "${IN_QUEUE}"…`);
 
   const shutdown = async (sig) => {
     console.log(`\n[Worker] ${sig} — shutting down…`);

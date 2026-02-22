@@ -1,0 +1,79 @@
+{
+  "success": true,
+  "error": null,
+  "issues": [
+    {
+      "title": "Integer Arithmetic Bugs",
+      "swc_id": "SWC-101",
+      "severity": "High",
+      "description": "The arithmetic operator can overflow.\nIt is possible to cause an integer overflow or underflow in the arithmetic operation. Prevent this by constraining inputs using the require() statement or use the OpenZeppelin SafeMath library for integer arithmetic operations. Refer to the transaction trace generated for this issue to reproduce the issue.",
+      "function": "withdraw(uint256)",
+      "filename": "contracts/target.sol",
+      "lineno": 12,
+      "code": "require(balances[msg.sender] >= amount);",
+      "tx_sequence": {
+        "steps": [{ "name": "CALL", "input": "0x3ccfd60b", "value": "0x0" }]
+      }
+    },
+    {
+      "title": "Reentrancy",
+      "swc_id": "SWC-107",
+      "severity": "High",
+      "description": "A call to a user-supplied address is executed. The callee address is the msg.sender. The callee can reenter the contract state is still mutable. This allows the caller to call back into the contract and potentially exploit state inconsistencies.\nEnsure that all state changes are performed before calling external contracts, or use a reentrancy guard modifier.",
+      "function": "withdraw(uint256)",
+      "filename": "contracts/target.sol",
+      "lineno": 14,
+      "code": "(bool success, ) = msg.sender.call{value: amount}(\"\");",
+      "tx_sequence": {
+        "steps": [
+          {
+            "name": "CALL",
+            "input": "0xd0e30db0",
+            "value": "0xde0b6b3a7640000"
+          },
+          { "name": "CALL", "input": "0x3ccfd60b", "value": "0x0" },
+          { "name": "REENTER", "input": "0x3ccfd60b", "value": "0x0" }
+        ]
+      }
+    },
+    {
+      "title": "Unchecked Return Value from External Call",
+      "swc_id": "SWC-104",
+      "severity": "Medium",
+      "description": "The return value of a message call is not checked. External calls return a boolean value. If the callee contract halts with an exception, 'false' is returned and execution continues in the caller. It is usually good practice to check the return value of the external call.",
+      "function": "withdraw(uint256)",
+      "filename": "contracts/target.sol",
+      "lineno": 15,
+      "code": "require(success);",
+      "tx_sequence": {
+        "steps": [{ "name": "CALL", "input": "0x3ccfd60b", "value": "0x0" }]
+      }
+    },
+    {
+      "title": "Unprotected Ether Withdrawal",
+      "swc_id": "SWC-105",
+      "severity": "High",
+      "description": "Any sender can withdraw Ether from the contract account. Arbitrary senders other than the contract creator can profitably extract Ether from the contract account. Verify the business logic carefully and make sure that appropriate security controls are in place to prevent unexpected loss of funds.",
+      "function": "withdraw(uint256)",
+      "filename": "contracts/target.sol",
+      "lineno": 11,
+      "code": "function withdraw(uint256 amount) public {",
+      "tx_sequence": {
+        "steps": [
+          {
+            "name": "CALL",
+            "input": "0xd0e30db0",
+            "value": "0xde0b6b3a7640000"
+          },
+          { "name": "CALL", "input": "0x3ccfd60b", "value": "0x0" }
+        ]
+      }
+    }
+  ],
+  "meta": {
+    "mythril_version": "0.24.8",
+    "analysis_time_seconds": 47,
+    "contract": "VulnerableBank",
+    "solver": "z3"
+  }
+}
