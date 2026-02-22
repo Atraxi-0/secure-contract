@@ -1,0 +1,420 @@
+{
+  "success": true,
+  "error": null,
+  "results": {
+    "detectors": [
+      {
+        "elements": [
+          {
+            "type": "function",
+            "name": "withdraw",
+            "source_mapping": {
+              "start": 227,
+              "length": 289,
+              "filename_relative": "contracts/target.sol",
+              "filename_absolute": "D:/secure-contract/contracts/target.sol",
+              "filename_short": "contracts/target.sol",
+              "is_dependency": false,
+              "lines": [
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17
+              ],
+              "starting_column": 5,
+              "ending_column": 6
+            },
+            "type_specific_fields": {
+              "parent": {
+                "type": "contract",
+                "name": "VulnerableBank",
+                "source_mapping": {
+                  "start": 57,
+                  "length": 461,
+                  "filename_relative": "contracts/target.sol",
+                  "filename_absolute": "D:/secure-contract/contracts/target.sol",
+                  "filename_short": "contracts/target.sol",
+                  "is_dependency": false,
+                  "lines": [
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19
+                  ],
+                  "starting_column": 1,
+                  "ending_column": 0
+                }
+              },
+              "signature": "withdraw(uint256)"
+            }
+          },
+          {
+            "type": "node",
+            "name": "(success,None) = msg.sender.call{value: amount}()",
+            "source_mapping": {
+              "start": 390,
+              "length": 53,
+              "filename_relative": "contracts/target.sol",
+              "filename_absolute": "D:/secure-contract/contracts/target.sol",
+              "filename_short": "contracts/target.sol",
+              "is_dependency": false,
+              "lines": [
+                14
+              ],
+              "starting_column": 9,
+              "ending_column": 62
+            },
+            "type_specific_fields": {
+              "parent": {
+                "type": "function",
+                "name": "withdraw",
+                "source_mapping": {
+                  "start": 227,
+                  "length": 289,
+                  "filename_relative": "contracts/target.sol",
+                  "filename_absolute": "D:/secure-contract/contracts/target.sol",
+                  "filename_short": "contracts/target.sol",
+                  "is_dependency": false,
+                  "lines": [
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17
+                  ],
+                  "starting_column": 5,
+                  "ending_column": 6
+                },
+                "type_specific_fields": {
+                  "parent": {
+                    "type": "contract",
+                    "name": "VulnerableBank",
+                    "source_mapping": {
+                      "start": 57,
+                      "length": 461,
+                      "filename_relative": "contracts/target.sol",
+                      "filename_absolute": "D:/secure-contract/contracts/target.sol",
+                      "filename_short": "contracts/target.sol",
+                      "is_dependency": false,
+                      "lines": [
+                        4,
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10,
+                        11,
+                        12,
+                        13,
+                        14,
+                        15,
+                        16,
+                        17,
+                        18,
+                        19
+                      ],
+                      "starting_column": 1,
+                      "ending_column": 0
+                    }
+                  },
+                  "signature": "withdraw(uint256)"
+                }
+              }
+            },
+            "additional_fields": {
+              "underlying_type": "external_calls"
+            }
+          },
+          {
+            "type": "node",
+            "name": "balances[msg.sender] -= amount",
+            "source_mapping": {
+              "start": 479,
+              "length": 30,
+              "filename_relative": "contracts/target.sol",
+              "filename_absolute": "D:/secure-contract/contracts/target.sol",
+              "filename_short": "contracts/target.sol",
+              "is_dependency": false,
+              "lines": [
+                16
+              ],
+              "starting_column": 9,
+              "ending_column": 39
+            },
+            "type_specific_fields": {
+              "parent": {
+                "type": "function",
+                "name": "withdraw",
+                "source_mapping": {
+                  "start": 227,
+                  "length": 289,
+                  "filename_relative": "contracts/target.sol",
+                  "filename_absolute": "D:/secure-contract/contracts/target.sol",
+                  "filename_short": "contracts/target.sol",
+                  "is_dependency": false,
+                  "lines": [
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17
+                  ],
+                  "starting_column": 5,
+                  "ending_column": 6
+                },
+                "type_specific_fields": {
+                  "parent": {
+                    "type": "contract",
+                    "name": "VulnerableBank",
+                    "source_mapping": {
+                      "start": 57,
+                      "length": 461,
+                      "filename_relative": "contracts/target.sol",
+                      "filename_absolute": "D:/secure-contract/contracts/target.sol",
+                      "filename_short": "contracts/target.sol",
+                      "is_dependency": false,
+                      "lines": [
+                        4,
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10,
+                        11,
+                        12,
+                        13,
+                        14,
+                        15,
+                        16,
+                        17,
+                        18,
+                        19
+                      ],
+                      "starting_column": 1,
+                      "ending_column": 0
+                    }
+                  },
+                  "signature": "withdraw(uint256)"
+                }
+              }
+            },
+            "additional_fields": {
+              "underlying_type": "variables_written",
+              "variable_name": "balances"
+            }
+          }
+        ],
+        "description": "Reentrancy in VulnerableBank.withdraw(uint256) (contracts/target.sol#11-17):\n\tExternal calls:\n\t- (success,None) = msg.sender.call{value: amount}() (contracts/target.sol#14)\n\tState variables written after the call(s):\n\t- balances[msg.sender] -= amount (contracts/target.sol#16)\n\tVulnerableBank.balances (contracts/target.sol#5) can be used in cross function reentrancies:\n\t- VulnerableBank.balances (contracts/target.sol#5)\n\t- VulnerableBank.deposit() (contracts/target.sol#7-9)\n\t- VulnerableBank.withdraw(uint256) (contracts/target.sol#11-17)\n",
+        "markdown": "Reentrancy in [VulnerableBank.withdraw(uint256)](contracts/target.sol#L11-L17):\n\tExternal calls:\n\t- [(success,None) = msg.sender.call{value: amount}()](contracts/target.sol#L14)\n\tState variables written after the call(s):\n\t- [balances[msg.sender] -= amount](contracts/target.sol#L16)\n\t[VulnerableBank.balances](contracts/target.sol#L5) can be used in cross function reentrancies:\n\t- [VulnerableBank.balances](contracts/target.sol#L5)\n\t- [VulnerableBank.deposit()](contracts/target.sol#L7-L9)\n\t- [VulnerableBank.withdraw(uint256)](contracts/target.sol#L11-L17)\n",
+        "first_markdown_element": "contracts/target.sol#L11-L17",
+        "id": "be6b595daaacb85c7371be2cfc1d3df241224a7d152b4be85d1180da0e366ee3",
+        "check": "reentrancy-eth",
+        "impact": "High",
+        "confidence": "Medium"
+      },
+      {
+        "elements": [
+          {
+            "type": "pragma",
+            "name": "^0.8.0",
+            "source_mapping": {
+              "start": 32,
+              "length": 23,
+              "filename_relative": "contracts/target.sol",
+              "filename_absolute": "D:/secure-contract/contracts/target.sol",
+              "filename_short": "contracts/target.sol",
+              "is_dependency": false,
+              "lines": [
+                2
+              ],
+              "starting_column": 1,
+              "ending_column": 24
+            },
+            "type_specific_fields": {
+              "directive": [
+                "solidity",
+                "^",
+                "0.8",
+                ".0"
+              ]
+            }
+          }
+        ],
+        "description": "Version constraint ^0.8.0 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- FullInlinerNonExpressionSplitArgumentEvaluationOrder\n\t- MissingSideEffectsOnSelectorAccess\n\t- AbiReencodingHeadOverflowWithStaticArrayCleanup\n\t- DirtyBytesArrayToStorage\n\t- DataLocationChangeInInternalOverride\n\t- NestedCalldataArrayAbiReencodingSizeValidation\n\t- SignedImmutables\n\t- ABIDecodeTwoDimensionalArrayMemory\n\t- KeccakCaching.\nIt is used by:\n\t- ^0.8.0 (contracts/target.sol#2)\n",
+        "markdown": "Version constraint ^0.8.0 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- FullInlinerNonExpressionSplitArgumentEvaluationOrder\n\t- MissingSideEffectsOnSelectorAccess\n\t- AbiReencodingHeadOverflowWithStaticArrayCleanup\n\t- DirtyBytesArrayToStorage\n\t- DataLocationChangeInInternalOverride\n\t- NestedCalldataArrayAbiReencodingSizeValidation\n\t- SignedImmutables\n\t- ABIDecodeTwoDimensionalArrayMemory\n\t- KeccakCaching.\nIt is used by:\n\t- [^0.8.0](contracts/target.sol#L2)\n",
+        "first_markdown_element": "contracts/target.sol#L2",
+        "id": "c2f7cff560a231eaea17d7526e89ebee09a7120a9a9f9fda903073605fd8534c",
+        "check": "solc-version",
+        "impact": "Informational",
+        "confidence": "High"
+      },
+      {
+        "elements": [
+          {
+            "type": "function",
+            "name": "withdraw",
+            "source_mapping": {
+              "start": 227,
+              "length": 289,
+              "filename_relative": "contracts/target.sol",
+              "filename_absolute": "D:/secure-contract/contracts/target.sol",
+              "filename_short": "contracts/target.sol",
+              "is_dependency": false,
+              "lines": [
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17
+              ],
+              "starting_column": 5,
+              "ending_column": 6
+            },
+            "type_specific_fields": {
+              "parent": {
+                "type": "contract",
+                "name": "VulnerableBank",
+                "source_mapping": {
+                  "start": 57,
+                  "length": 461,
+                  "filename_relative": "contracts/target.sol",
+                  "filename_absolute": "D:/secure-contract/contracts/target.sol",
+                  "filename_short": "contracts/target.sol",
+                  "is_dependency": false,
+                  "lines": [
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19
+                  ],
+                  "starting_column": 1,
+                  "ending_column": 0
+                }
+              },
+              "signature": "withdraw(uint256)"
+            }
+          },
+          {
+            "type": "node",
+            "name": "(success,None) = msg.sender.call{value: amount}()",
+            "source_mapping": {
+              "start": 390,
+              "length": 53,
+              "filename_relative": "contracts/target.sol",
+              "filename_absolute": "D:/secure-contract/contracts/target.sol",
+              "filename_short": "contracts/target.sol",
+              "is_dependency": false,
+              "lines": [
+                14
+              ],
+              "starting_column": 9,
+              "ending_column": 62
+            },
+            "type_specific_fields": {
+              "parent": {
+                "type": "function",
+                "name": "withdraw",
+                "source_mapping": {
+                  "start": 227,
+                  "length": 289,
+                  "filename_relative": "contracts/target.sol",
+                  "filename_absolute": "D:/secure-contract/contracts/target.sol",
+                  "filename_short": "contracts/target.sol",
+                  "is_dependency": false,
+                  "lines": [
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17
+                  ],
+                  "starting_column": 5,
+                  "ending_column": 6
+                },
+                "type_specific_fields": {
+                  "parent": {
+                    "type": "contract",
+                    "name": "VulnerableBank",
+                    "source_mapping": {
+                      "start": 57,
+                      "length": 461,
+                      "filename_relative": "contracts/target.sol",
+                      "filename_absolute": "D:/secure-contract/contracts/target.sol",
+                      "filename_short": "contracts/target.sol",
+                      "is_dependency": false,
+                      "lines": [
+                        4,
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10,
+                        11,
+                        12,
+                        13,
+                        14,
+                        15,
+                        16,
+                        17,
+                        18,
+                        19
+                      ],
+                      "starting_column": 1,
+                      "ending_column": 0
+                    }
+                  },
+                  "signature": "withdraw(uint256)"
+                }
+              }
+            }
+          }
+        ],
+        "description": "Low level call in VulnerableBank.withdraw(uint256) (contracts/target.sol#11-17):\n\t- (success,None) = msg.sender.call{value: amount}() (contracts/target.sol#14)\n",
+        "markdown": "Low level call in [VulnerableBank.withdraw(uint256)](contracts/target.sol#L11-L17):\n\t- [(success,None) = msg.sender.call{value: amount}()](contracts/target.sol#L14)\n",
+        "first_markdown_element": "contracts/target.sol#L11-L17",
+        "id": "88aefd828947bb63e58f6f93c6989d762e13b2dbd7bb8a16d965e1dc8267be4e",
+        "check": "low-level-calls",
+        "impact": "Informational",
+        "confidence": "High"
+      }
+    ]
+  }
+}

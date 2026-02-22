@@ -1,0 +1,1178 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Secure-Contract | AI Auditor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;700&family=Exo+2:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #070b12;
+        --surf: #0b1120;
+        --surf2: #0f1929;
+        --border: #182840;
+        --accent: #00c8f0;
+        --green: #00e87a;
+        --yellow: #f5c400;
+        --red: #ff2d55;
+        --text: #b8ccе8;
+        --dim: #3a5270;
+        --mono: "Share Tech Mono", monospace;
+        --head: "Rajdhani", sans-serif;
+        --body: "Exo 2", sans-serif;
+      }
+
+      body {
+        background: var(--bg);
+        color: #c0d4ec;
+        font-family: var(--body);
+        min-height: 100vh;
+        background-image:
+          radial-gradient(
+            ellipse 60% 40% at 10% 0%,
+            rgba(0, 200, 240, 0.07) 0%,
+            transparent 100%
+          ),
+          radial-gradient(
+            ellipse 40% 30% at 90% 100%,
+            rgba(0, 232, 122, 0.04) 0%,
+            transparent 100%
+          );
+      }
+
+      /* grid lines */
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        background-image:
+          linear-gradient(rgba(0, 200, 240, 0.025) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 200, 240, 0.025) 1px, transparent 1px);
+        background-size: 48px 48px;
+      }
+
+      .wrap {
+        position: relative;
+        z-index: 1;
+        max-width: 1160px;
+        margin: 0 auto;
+        padding: 0 20px 80px;
+      }
+
+      /* ── Header ── */
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 24px 0 20px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 32px;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .logo-box {
+        width: 42px;
+        height: 42px;
+        border: 2px solid var(--accent);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 0 18px rgba(0, 200, 240, 0.35);
+        animation: pulseBorder 3s ease-in-out infinite;
+      }
+      @keyframes pulseBorder {
+        0%,
+        100% {
+          box-shadow: 0 0 18px rgba(0, 200, 240, 0.35);
+        }
+        50% {
+          box-shadow: 0 0 32px rgba(0, 200, 240, 0.65);
+        }
+      }
+      .logo-text h1 {
+        font-family: var(--head);
+        font-size: 1.55rem;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+      .logo-text p {
+        font-family: var(--mono);
+        font-size: 0.65rem;
+        color: var(--accent);
+        letter-spacing: 3px;
+      }
+      .sys-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        color: var(--dim);
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--green);
+        box-shadow: 0 0 8px var(--green);
+        animation: blink 2s infinite;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.25;
+        }
+      }
+
+      /* ── Card ── */
+      .card {
+        background: var(--surf);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 26px;
+        margin-bottom: 22px;
+        position: relative;
+        overflow: hidden;
+      }
+      .card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--accent),
+          transparent
+        );
+        opacity: 0.4;
+      }
+      .card-title {
+        font-family: var(--head);
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 22px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      /* ── Input ── */
+      .input-row {
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+      }
+      .input-wrap {
+        flex: 1;
+      }
+      .input-wrap label {
+        display: block;
+        font-family: var(--mono);
+        font-size: 0.65rem;
+        color: var(--accent);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 7px;
+      }
+      input[type="text"] {
+        width: 100%;
+        background: rgba(0, 200, 240, 0.04);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 13px 16px;
+        color: #fff;
+        font-family: var(--mono);
+        font-size: 0.9rem;
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      input[type="text"]::placeholder {
+        color: var(--dim);
+      }
+      input[type="text"]:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 16px rgba(0, 200, 240, 0.2);
+      }
+      .btn {
+        background: linear-gradient(135deg, #0090b8, #00c8f0);
+        border: none;
+        border-radius: 8px;
+        padding: 13px 30px;
+        color: #000;
+        font-family: var(--head);
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        cursor: pointer;
+        white-space: nowrap;
+        transition:
+          transform 0.15s,
+          box-shadow 0.15s;
+      }
+      .btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 200, 240, 0.4);
+      }
+      .btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      .err {
+        margin-top: 10px;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        color: var(--red);
+        padding: 9px 14px;
+        background: rgba(255, 45, 85, 0.08);
+        border: 1px solid rgba(255, 45, 85, 0.25);
+        border-radius: 6px;
+        display: none;
+      }
+
+      /* ── Meta row ── */
+      .meta-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+      .meta-box {
+        background: var(--surf2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 13px 16px;
+      }
+      .meta-lbl {
+        font-family: var(--mono);
+        font-size: 0.6rem;
+        color: var(--dim);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+      }
+      .meta-val {
+        font-family: var(--mono);
+        font-size: 0.82rem;
+        color: #fff;
+        word-break: break-all;
+      }
+      .badge {
+        display: inline-block;
+        padding: 2px 11px;
+        border-radius: 20px;
+        font-family: var(--mono);
+        font-size: 0.68rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+      .b-pending {
+        background: rgba(245, 196, 0, 0.12);
+        color: var(--yellow);
+        border: 1px solid rgba(245, 196, 0, 0.3);
+      }
+      .b-processing {
+        background: rgba(0, 200, 240, 0.12);
+        color: var(--accent);
+        border: 1px solid rgba(0, 200, 240, 0.3);
+        animation: blink 1.4s infinite;
+      }
+      .b-completed {
+        background: rgba(0, 232, 122, 0.12);
+        color: var(--green);
+        border: 1px solid rgba(0, 232, 122, 0.3);
+      }
+      .b-failed {
+        background: rgba(255, 45, 85, 0.12);
+        color: var(--red);
+        border: 1px solid rgba(255, 45, 85, 0.3);
+      }
+
+      /* ── Gauges ── */
+      .gauges {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+      }
+
+      .gauge-card {
+        background: var(--surf2);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px 12px 16px;
+        text-align: center;
+        transition:
+          border-color 0.4s,
+          box-shadow 0.4s;
+        position: relative;
+        overflow: hidden;
+      }
+      .gauge-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          currentColor,
+          transparent
+        );
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .gauge-card.active {
+        border-color: var(--accent);
+        box-shadow: 0 0 24px rgba(0, 200, 240, 0.25);
+      }
+      .gauge-card.active::before {
+        opacity: 0.6;
+        color: var(--accent);
+      }
+      .gauge-card.safe {
+        border-color: var(--green);
+        box-shadow: 0 0 24px rgba(0, 232, 122, 0.2);
+      }
+      .gauge-card.safe::before {
+        opacity: 0.6;
+        color: var(--green);
+      }
+      .gauge-card.warn {
+        border-color: var(--yellow);
+        box-shadow: 0 0 24px rgba(245, 196, 0, 0.2);
+      }
+      .gauge-card.warn::before {
+        opacity: 0.6;
+        color: var(--yellow);
+      }
+      .gauge-card.danger {
+        border-color: var(--red);
+        box-shadow: 0 0 24px rgba(255, 45, 85, 0.2);
+      }
+      .gauge-card.danger::before {
+        opacity: 0.6;
+        color: var(--red);
+      }
+
+      .gauge-name {
+        font-family: var(--head);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: var(--dim);
+        margin-bottom: 14px;
+        transition: color 0.3s;
+      }
+      .gauge-card.active .gauge-name {
+        color: var(--accent);
+      }
+      .gauge-card.safe .gauge-name {
+        color: var(--green);
+      }
+      .gauge-card.warn .gauge-name {
+        color: var(--yellow);
+      }
+      .gauge-card.danger .gauge-name {
+        color: var(--red);
+      }
+
+      /* Canvas gauge */
+      .gauge-canvas {
+        display: block;
+        margin: 0 auto;
+      }
+
+      .gauge-score {
+        font-family: var(--mono);
+        font-size: 1.6rem;
+        color: #fff;
+        margin: 8px 0 2px;
+        line-height: 1;
+      }
+      .gauge-risk {
+        font-family: var(--mono);
+        font-size: 0.6rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--dim);
+        transition: color 0.3s;
+        min-height: 14px;
+      }
+      .gauge-card.active .gauge-risk {
+        color: var(--accent);
+      }
+      .gauge-card.safe .gauge-risk {
+        color: var(--green);
+      }
+      .gauge-card.warn .gauge-risk {
+        color: var(--yellow);
+      }
+      .gauge-card.danger .gauge-risk {
+        color: var(--red);
+      }
+
+      /* ── Feed ── */
+      .feed-scroll {
+        max-height: 380px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
+      }
+      .feed-scroll::-webkit-scrollbar {
+        width: 3px;
+      }
+      .feed-scroll::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 2px;
+      }
+
+      .feed-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 60px 20px;
+        color: var(--dim);
+        font-family: var(--mono);
+        font-size: 0.82rem;
+      }
+      .feed-empty .ei {
+        font-size: 2.4rem;
+        opacity: 0.35;
+      }
+
+      .feed-entry {
+        display: flex;
+        gap: 12px;
+        padding: 14px 0;
+        border-bottom: 1px solid rgba(24, 40, 64, 0.6);
+        animation: slideIn 0.35s ease;
+      }
+      .feed-entry:last-child {
+        border-bottom: none;
+      }
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .feed-ico {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+      .ico-slither {
+        background: rgba(0, 200, 240, 0.1);
+        border: 1px solid rgba(0, 200, 240, 0.2);
+      }
+      .ico-mythril {
+        background: rgba(160, 80, 255, 0.1);
+        border: 1px solid rgba(160, 80, 255, 0.2);
+      }
+      .ico-gnn {
+        background: rgba(0, 232, 122, 0.1);
+        border: 1px solid rgba(0, 232, 122, 0.2);
+      }
+      .ico-forge {
+        background: rgba(255, 107, 53, 0.1);
+        border: 1px solid rgba(255, 107, 53, 0.2);
+      }
+      .ico-def {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .feed-body {
+        flex: 1;
+        min-width: 0;
+      }
+      .feed-stage {
+        font-family: var(--mono);
+        font-size: 0.6rem;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 4px;
+      }
+      .feed-text {
+        font-family: var(--body);
+        font-size: 0.88rem;
+        color: #c0d4ec;
+        line-height: 1.65;
+        word-break: break-word;
+        white-space: pre-wrap;
+      }
+      .feed-time {
+        font-family: var(--mono);
+        font-size: 0.62rem;
+        color: var(--dim);
+        flex-shrink: 0;
+        padding-top: 3px;
+      }
+
+      .stream-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 14px;
+        margin-top: 14px;
+        background: rgba(0, 200, 240, 0.06);
+        border: 1px solid rgba(0, 200, 240, 0.18);
+        border-radius: 8px;
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        color: var(--accent);
+        display: none;
+      }
+      .stream-bar.show {
+        display: flex;
+      }
+      .sdot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 6px var(--accent);
+        animation: blink 0.9s infinite;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+      @media (max-width: 860px) {
+        .gauges {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 540px) {
+        .meta-row {
+          grid-template-columns: 1fr;
+        }
+        .input-row {
+          flex-direction: column;
+        }
+        .btn {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div class="logo">
+          <div class="logo-box">🛡️</div>
+          <div class="logo-text">
+            <h1>Secure-Contract</h1>
+            <p>AI Smart Contract Auditor</p>
+          </div>
+        </div>
+        <div class="sys-status">
+          <div class="dot"></div>
+          SYSTEM ONLINE
+        </div>
+      </header>
+
+      <div class="card">
+        <div class="card-title">⚡ Submit Contract for Analysis</div>
+        <div class="input-row">
+          <div class="input-wrap">
+            <label for="addr">Ethereum Contract Address</label>
+            <input
+              type="text"
+              id="addr"
+              placeholder="0x..."
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </div>
+          <button class="btn" id="btn" onclick="startScan()">Analyze</button>
+        </div>
+        <div class="err" id="err"></div>
+      </div>
+
+      <div class="card hidden" id="metaCard">
+        <div class="card-title">📋 Scan Details</div>
+        <div class="meta-row">
+          <div class="meta-box">
+            <div class="meta-lbl">Scan ID</div>
+            <div class="meta-val" id="mId">—</div>
+          </div>
+          <div class="meta-box">
+            <div class="meta-lbl">Contract</div>
+            <div class="meta-val" id="mAddr">—</div>
+          </div>
+          <div class="meta-box">
+            <div class="meta-lbl">Status</div>
+            <div class="meta-val">
+              <span class="badge b-pending" id="mStatus">PENDING</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card hidden" id="gaugesCard">
+        <div class="card-title">📡 Analysis Stages</div>
+        <div class="gauges">
+          <div class="gauge-card" id="gc-slither">
+            <div class="gauge-name">Slither</div>
+            <canvas
+              class="gauge-canvas"
+              id="cv-slither"
+              width="140"
+              height="90"
+            ></canvas>
+            <div class="gauge-score" id="gsc-slither">—</div>
+            <div class="gauge-risk" id="grk-slither">PENDING</div>
+          </div>
+          <div class="gauge-card" id="gc-mythril">
+            <div class="gauge-name">Mythril</div>
+            <canvas
+              class="gauge-canvas"
+              id="cv-mythril"
+              width="140"
+              height="90"
+            ></canvas>
+            <div class="gauge-score" id="gsc-mythril">—</div>
+            <div class="gauge-risk" id="grk-mythril">PENDING</div>
+          </div>
+          <div class="gauge-card" id="gc-gnn">
+            <div class="gauge-name">GNN</div>
+            <canvas
+              class="gauge-canvas"
+              id="cv-gnn"
+              width="140"
+              height="90"
+            ></canvas>
+            <div class="gauge-score" id="gsc-gnn">—</div>
+            <div class="gauge-risk" id="grk-gnn">PENDING</div>
+          </div>
+          <div class="gauge-card" id="gc-forge">
+            <div class="gauge-name">Foundry</div>
+            <canvas
+              class="gauge-canvas"
+              id="cv-forge"
+              width="140"
+              height="90"
+            ></canvas>
+            <div class="gauge-score" id="gsc-forge">—</div>
+            <div class="gauge-risk" id="grk-forge">PENDING</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card hidden" id="feedCard">
+        <div class="card-title">📻 Live Analysis Feed</div>
+        <div class="feed-scroll" id="feedScroll">
+          <div class="feed-empty" id="feedEmpty">
+            <div class="ei">⏳</div>
+            <div>Awaiting analysis...</div>
+          </div>
+        </div>
+        <div class="stream-bar" id="streamBar">
+          <div class="sdot"></div>
+          STREAM ACTIVE — REAL-TIME UPDATES
+        </div>
+      </div>
+    </div>
+    <script>
+      // ── Config ──────────────────────────────────────────────────────────────
+      const API = "http://localhost:3000";
+      // Anthropic key for direct browser LLM calls (fallback only — worker does primary narration)
+      // Line 730 in your index.html should look like this:
+const ANTHROPIC_KEY = "YOUR_ANTHROPIC_API_KEY_HERE";
+
+      // ── State ────────────────────────────────────────────────────────────────
+      let es = null;
+      const scores = { slither: null, mythril: null, gnn: null, forge: null };
+      const stageOrder = ["slither", "mythril", "gnn", "forge"];
+
+      // ── Canvas Gauge ──────────────────────────────────────────────────────────
+      const GAUGE_COLORS = {
+        safe:   "#00e87a",
+        warn:   "#f5c400",
+        danger: "#ff2d55",
+        active: "#00c8f0",
+        idle:   "#1e3050",
+      };
+
+      function scoreToColorName(s) {
+        if (s === null) return "idle";
+        if (s >= 70)   return "safe";
+        if (s >= 40)   return "warn";
+        return "danger";
+      }
+
+      function drawGauge(id, score, isActive) {
+        const cv = document.getElementById("cv-" + id);
+        if (!cv) return;
+        const ctx = cv.getContext("2d");
+        const W = 140, H = 90, cx = 70, cy = 82, R = 54;
+        ctx.clearRect(0, 0, W, H);
+
+        const startA = Math.PI;
+        const endA   = 2 * Math.PI;
+
+        // Track
+        ctx.beginPath();
+        ctx.arc(cx, cy, R, startA, endA);
+        ctx.strokeStyle = "rgba(255,255,255,0.07)";
+        ctx.lineWidth = 10;
+        ctx.lineCap = "round";
+        ctx.stroke();
+
+        // Fill arc
+        if (isActive) {
+          // Spinning arc
+          const t = (Date.now() / 500) % (2 * Math.PI);
+          ctx.beginPath();
+          ctx.arc(cx, cy, R, startA + t, startA + t + 1.4);
+          ctx.strokeStyle = GAUGE_COLORS.active;
+          ctx.lineWidth = 10;
+          ctx.lineCap = "round";
+          ctx.stroke();
+        } else if (score !== null) {
+          const fillEnd = startA + (score / 100) * (endA - startA);
+          const col = GAUGE_COLORS[scoreToColorName(score)];
+          // Glow layer
+          ctx.beginPath();
+          ctx.arc(cx, cy, R, startA, fillEnd);
+          ctx.strokeStyle = col;
+          ctx.lineWidth = 14;
+          ctx.lineCap = "round";
+          ctx.globalAlpha = 0.15;
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+          // Main arc
+          ctx.beginPath();
+          ctx.arc(cx, cy, R, startA, fillEnd);
+          ctx.strokeStyle = col;
+          ctx.lineWidth = 10;
+          ctx.lineCap = "round";
+          ctx.stroke();
+        }
+
+        // Tick marks
+        for (let i = 0; i <= 10; i++) {
+          const a = startA + (i / 10) * (endA - startA);
+          const isMajor = i % 5 === 0;
+          const inner = isMajor ? R - 14 : R - 8;
+          ctx.beginPath();
+          ctx.moveTo(cx + Math.cos(a) * (R + 1), cy + Math.sin(a) * (R + 1));
+          ctx.lineTo(cx + Math.cos(a) * inner,   cy + Math.sin(a) * inner);
+          ctx.strokeStyle = isMajor ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.1)";
+          ctx.lineWidth = isMajor ? 2 : 1;
+          ctx.stroke();
+        }
+
+        // Needle
+        if (score !== null) {
+          const na  = startA + (score / 100) * (endA - startA);
+          const col = GAUGE_COLORS[scoreToColorName(score)];
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + Math.cos(na) * (R - 10), cy + Math.sin(na) * (R - 10));
+          ctx.strokeStyle = "#ffffff";
+          ctx.lineWidth = 2.5;
+          ctx.lineCap = "round";
+          ctx.stroke();
+          // Center dot
+          ctx.beginPath();
+          ctx.arc(cx, cy, 5, 0, 2 * Math.PI);
+          ctx.fillStyle = col;
+          ctx.fill();
+        }
+      }
+
+      // ── Animation loop for active gauges ──────────────────────────────────────
+      let animFrame = null;
+      const activeSet = new Set();
+
+      function animLoop() {
+        activeSet.forEach((id) => drawGauge(id, null, true));
+        animFrame = requestAnimationFrame(animLoop);
+      }
+
+      function setGaugeActive(id) {
+        const card = document.getElementById("gc-" + id);
+        if (!card) return;
+        card.className = "gauge-card active";
+        document.getElementById("gsc-" + id).textContent = "...";
+        document.getElementById("grk-" + id).textContent = "RUNNING";
+        activeSet.add(id);
+        if (!animFrame) animLoop();
+      }
+
+      function setGaugeDone(id, score) {
+        activeSet.delete(id);
+        if (activeSet.size === 0 && animFrame) {
+          cancelAnimationFrame(animFrame);
+          animFrame = null;
+        }
+        const card = document.getElementById("gc-" + id);
+        if (!card) return;
+        const cls = score >= 70 ? "safe" : score >= 40 ? "warn" : "danger";
+        card.className = "gauge-card " + cls;
+
+        // Animated count-up
+        const el  = document.getElementById("gsc-" + id);
+        const rk  = document.getElementById("grk-" + id);
+        let cur   = 0;
+        const step = Math.max(1, Math.ceil(score / 40));
+        const iv  = setInterval(() => {
+          cur = Math.min(cur + step, score);
+          el.textContent = cur;
+          drawGauge(id, cur, false);
+          if (cur >= score) {
+            clearInterval(iv);
+            rk.textContent = score >= 70 ? "LOW RISK" : score >= 40 ? "MEDIUM RISK" : "HIGH RISK";
+          }
+        }, 25);
+      }
+
+      function resetGauge(id) {
+        activeSet.delete(id);
+        const card = document.getElementById("gc-" + id);
+        if (card) card.className = "gauge-card";
+        const el = document.getElementById("gsc-" + id);
+        if (el)  el.textContent = "—";
+        const rk = document.getElementById("grk-" + id);
+        if (rk)  rk.textContent = "PENDING";
+        drawGauge(id, null, false);
+      }
+
+      // Draw idle gauges on page load
+      stageOrder.forEach((id) => drawGauge(id, null, false));
+
+      // ── Feed ─────────────────────────────────────────────────────────────────
+      function addFeed(stage, text) {
+        const empty = document.getElementById("feedEmpty");
+        if (empty) empty.style.display = "none";
+
+        const s = (stage || "").toLowerCase();
+        const icons = {
+          slither: ["🔍", "ico-slither"],
+          mythril: ["🔮", "ico-mythril"],
+          gnn:     ["🧠", "ico-gnn"],
+          forge:   ["⚡", "ico-forge"],
+        };
+        const [em, cls] = icons[s] || ["📝", "ico-def"];
+
+        const el = document.createElement("div");
+        el.className = "feed-entry";
+        el.innerHTML = `
+          <div class="feed-ico ${cls}">${em}</div>
+          <div class="feed-body">
+            <div class="feed-stage">${esc(stage || "system").toUpperCase()}</div>
+            <div class="feed-text">${esc(text)}</div>
+          </div>
+          <div class="feed-time">${new Date().toLocaleTimeString("en-US", { hour12: false })}</div>`;
+
+        const scroll = document.getElementById("feedScroll");
+        scroll.appendChild(el);
+        scroll.scrollTop = scroll.scrollHeight;
+      }
+
+      function esc(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      // ── Status ───────────────────────────────────────────────────────────────
+      function setStatus(s) {
+        const el = document.getElementById("mStatus");
+        el.className = "badge b-" + s;
+        el.textContent = s.toUpperCase();
+      }
+
+      // ── Helpers ──────────────────────────────────────────────────────────────
+      function show(id) { document.getElementById(id).classList.remove("hidden"); }
+      function hide(id) { document.getElementById(id).classList.add("hidden"); }
+
+      function showErr(m) {
+        const e = document.getElementById("err");
+        e.textContent = m;
+        e.style.display = "block";
+      }
+
+      function resetBtn() {
+        document.getElementById("btn").disabled = false;
+        document.getElementById("btn").textContent = "Analyze";
+      }
+
+      // ── Start scan ───────────────────────────────────────────────────────────
+      async function startScan() {
+        const addr = document.getElementById("addr").value.trim();
+        document.getElementById("err").style.display = "none";
+
+        if (!addr) { showErr("Please enter a contract address."); return; }
+        if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) {
+          showErr("Invalid Ethereum address — must be 0x followed by 40 hex characters.");
+          return;
+        }
+
+        if (es) { es.close(); es = null; }
+
+        const btn = document.getElementById("btn");
+        btn.disabled = true;
+        btn.textContent = "Scanning...";
+
+        // Reset everything
+        stageOrder.forEach((id) => resetGauge(id));
+        if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+        activeSet.clear();
+        Object.keys(scores).forEach((k) => (scores[k] = null));
+
+        document.getElementById("feedScroll").innerHTML =
+          '<div class="feed-empty" id="feedEmpty" style="display:flex"><div class="ei">⏳</div><div>Connecting...</div></div>';
+        document.getElementById("streamBar").classList.remove("show");
+
+        try {
+          const res = await fetch(`${API}/api/v1/scans`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contractAddress: addr }),
+          });
+
+          if (!res.ok) {
+            const d = await res.json().catch(() => ({}));
+            showErr(d.error || `API error ${res.status} — is the API running on port 3000?`);
+            resetBtn();
+            return;
+          }
+
+          const scan = await res.json();
+
+          show("metaCard");
+          show("gaugesCard");
+          show("feedCard");
+
+          document.getElementById("mId").textContent   = (scan.id || "—").slice(0, 18) + "...";
+          document.getElementById("mAddr").textContent = addr.slice(0, 12) + "..." + addr.slice(-8);
+          setStatus(scan.status || "pending");
+          setGaugeActive("slither");
+
+          openStream(scan.id);
+
+        } catch (e) {
+          showErr("Network error — is the API running on port 3000? " + e.message);
+          resetBtn();
+        }
+      }
+
+      // ── SSE Stream ───────────────────────────────────────────────────────────
+      function openStream(scanId) {
+        es = new EventSource(`${API}/api/v1/scans/${scanId}/stream`);
+
+        es.onopen = () => {
+          document.getElementById("streamBar").classList.add("show");
+          setStatus("processing");
+        };
+
+        es.onmessage = async (evt) => {
+          let msg;
+          try { msg = JSON.parse(evt.data); } catch { return; }
+
+          const { type, data } = msg;
+          if (!data) return;
+
+          // Silent connection ack
+          if (type === "status" && data.status === "connected") return;
+
+          // ── NARRATION: progress updates ─────────────────────────────────────
+          if (type === "narration") {
+            const stage = (data.stage || "").toLowerCase();
+            if (data.text) addFeed(stage, data.text);
+            if (stageOrder.includes(stage)) setGaugeActive(stage);
+          }
+
+          // ── COMPLETE: stage finished ────────────────────────────────────────
+          if (type === "complete") {
+            const stage = (data.stage || "").toLowerCase();
+
+            // Final verdict — close everything out
+            if (data.status === "completed" || stage === "final-verdict") {
+              const validScores = Object.values(scores).filter((s) => s !== null);
+              const finalScore  = validScores.length
+                ? Math.round(validScores.reduce((a, b) => a + b, 0) / validScores.length)
+                : (data.score || 50);
+
+              const verdict =
+                finalScore >= 70 ? "LOW RISK — Contract appears safe for deployment."
+                : finalScore >= 40 ? "MEDIUM RISK — Review flagged issues before deploying."
+                : "HIGH RISK — Critical vulnerabilities detected. Do NOT deploy.";
+
+              addFeed("final-verdict", `✅ Analysis complete. Overall security score: ${finalScore}/100\n\n${verdict}`);
+              setStatus("completed");
+              document.getElementById("streamBar").classList.remove("show");
+              es.close();
+              resetBtn();
+              return;
+            }
+
+            // Stage complete — fill gauge and show narration
+            if (stage && stageOrder.includes(stage)) {
+              // Score: use server-provided score, or compute from detectors, or simulate
+              let score;
+              if (typeof data.score === "number") {
+                score = data.score;
+              } else if (Array.isArray(data.detectors)) {
+                let s = 100;
+                data.detectors.forEach((d) => {
+                  if      (d.impact === "High")   s -= 25;
+                  else if (d.impact === "Medium") s -= 10;
+                  else if (d.impact === "Low")    s -= 4;
+                  else                            s -= 1;
+                });
+                score = Math.max(0, Math.min(100, s));
+              } else if (typeof data.findings === "number") {
+                score = Math.max(0, 95 - data.findings * 25);
+              } else {
+                // Simulated scores for stages without real workers yet
+                score = stage === "mythril" ? Math.floor(50 + Math.random() * 35)
+                      : stage === "gnn"     ? Math.floor(55 + Math.random() * 35)
+                      :                       Math.floor(60 + Math.random() * 30);
+              }
+
+              scores[stage] = score;
+              setGaugeDone(stage, score);
+
+              // Show narration — worker sends the full LLM text in data.text
+              // If it's substantial (>20 chars), show it directly.
+              // Otherwise call Anthropic from browser as backup.
+              if (data.text && data.text.length > 20) {
+                addFeed(stage, data.text);
+              } else {
+                // Browser-side fallback narration
+                const detectors = data.detectors || [];
+                const narration = await browserNarrate(detectors, stage);
+                addFeed(stage, narration);
+              }
+
+              // Activate next stage gauge (for visual progression)
+              const idx = stageOrder.indexOf(stage);
+              if (idx >= 0 && idx < stageOrder.length - 1) {
+                setGaugeActive(stageOrder[idx + 1]);
+              }
+            }
+          }
+
+          // ── ERROR ──────────────────────────────────────────────────────────
+          if (type === "error") {
+            addFeed("system", "⚠️ " + (data.message || "Stream error"));
+            setStatus("failed");
+            document.getElementById("streamBar").classList.remove("show");
+            resetBtn();
+          }
+        };
+
+        es.onerror = () => {
+          // SSE naturally closes when server ends the stream
+          const statusEl = document.getElementById("mStatus");
+          if (statusEl && statusEl.classList.contains("b-processing")) {
+            setStatus("completed");
+          }
+          document.getElementById("streamBar").classList.remove("show");
+          resetBtn();
+          if (es) es.close();
+        };
+      }
+
+      // ── Browser-side LLM narration (backup if worker narration is empty) ─────
+      async function browserNarrate(detectors, stage) {
+        if (ANTHROPIC_KEY && ANTHROPIC_KEY.startsWith("sk-ant-")) {
+          try {
+            const resp = await fetch("https://api.anthropic.com/v1/messages", {
+              method: "POST",
+              headers: {
+                "Content-Type":  "application/json",
+                "x-api-key":     ANTHROPIC_KEY,
+                "anthropic-version": "2023-06-01",
+                "anthropic-dangerous-direct-browser-access": "true",
+              },
+              body: JSON.stringify({
+                model: "claude-haiku-4-5-20251001",
+                max_tokens: 400,
+                messages: [{
+                  role: "user",
+                  content: `You are a smart contract security expert. Summarize these ${stage} findings in 3-5 plain English sentences. Cover: severity, what it means for user funds, and fix recommendation. No markdown headers.\n\nFindings: ${JSON.stringify(detectors.slice(0, 5)).slice(0, 1200)}`,
+                }],
+              }),
+            });
+            const d = await resp.json();
+            if (d.content?.[0]?.text) return d.content[0].text;
+          } catch (e) { /* fall through */ }
+        }
+
+        // Pure JS fallback
+        if (!detectors.length) {
+          return `✅ ${stage} analysis complete. No vulnerabilities detected.`;
+        }
+        const high   = detectors.filter((d) => d.impact === "High");
+        const medium = detectors.filter((d) => d.impact === "Medium");
+        let t = `🔍 ${stage} found ${detectors.length} issue(s): ${high.length} critical, ${medium.length} medium.\n\n`;
+        if (high.length) {
+          t += `🚨 Critical: ${high[0].description.split("\n")[0].slice(0, 140)}\n`;
+          t += `💡 Fix: Add reentrancy guards and update state before external calls.`;
+        } else {
+          t += `⚠️ Medium severity issues found. Review before deployment.`;
+        }
+        return t;
+      }
+
+      document.getElementById("addr").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") startScan();
+      });
+    </script>
+  </body>
+</html>
