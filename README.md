@@ -26,7 +26,7 @@
 
 ## ⚡ What Is This?
 
-Secure-Contract is an **AI-powered smart contract security auditor** built for the INCUBATEX Hackathon. Paste an Ethereum contract address — the platform spins up a four-stage analysis pipeline, streams findings to your browser in real time, and delivers a comprehensive AI-narrated security report in minutes.
+Secure-Contract is an **AI-powered smart contract security auditor** built for the HACKNOVATION 2.O Hackathon. Paste an Ethereum contract address — the platform spins up a four-stage analysis pipeline, streams findings to your browser in real time, and delivers a comprehensive AI-narrated security report in minutes.
 
 Instead of waiting weeks and paying $50,000 for a manual audit, developers get an automated first-pass that catches the most critical vulnerability classes before deployment.
 
@@ -423,4 +423,5 @@ Built at **INCUBATEX Hackathon** by Team Secure-Contract.
 **🛡️ Secure-Contract — Audit before you deploy.**
 
 </div>
+
 
