@@ -80,20 +80,20 @@ Every stage streams its findings live via **Server-Sent Events**. Claude Haiku w
 │         ↓ chains                                                 │
 │  [gnn-analysis]      → Stage 3                                   │
 │         ↓ chains                                                 │
-│  [forge-analysis]    → Stage 4 → final-verdict                  │
+│  [forge-analysis]    → Stage 4 → final-verdict                   │
 └──────────────┬───────────────────────────────────────────────────┘
                │ Redis Pub/Sub → SSE → Browser
                ▼
 ┌──────────────────────────────────────────────────────────────────┐
 │                    WORKER PIPELINE                               │
 │                                                                  │
-│  Stage 1 (Slither)  → reads slither_output.json                 │
-│  Stage 2 (Mythril)  → runs Docker container                     │
-│  Stage 3 (GNN)      → graph pattern matching                    │
-│  Stage 4 (Forge)    → mainnet fork simulation                   │
+│  Stage 1 (Slither)  → reads slither_output.json                  │
+│  Stage 2 (Mythril)  → runs Docker container                      │
+│  Stage 3 (GNN)      → graph pattern matching                     │
+│  Stage 4 (Forge)    → mainnet fork simulation                    │
 │                                                                  │
-│  Each worker → Claude Haiku → narration → Redis pub/sub         │
-│                            → PostgreSQL → persisted             │
+│  Each worker → Claude Haiku → narration → Redis pub/sub          │
+│                            → PostgreSQL → persisted              │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
